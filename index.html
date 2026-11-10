@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sundown Demonlist</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/png" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -72,6 +72,8 @@ a { color: var(--accent); }
 
 /* Header */
 .top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.brand img { width: 28px; height: 28px; display: block; }
 .top h1 { margin: 0; font-size: 18px; font-weight: 700; }
 .nav { display: flex; gap: 20px; }
 .nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; padding-block: 4px; border-bottom: 2px solid transparent; }
@@ -220,7 +222,10 @@ a { color: var(--accent); }
 <body>
 
 <header class="top">
-  <h1 id="title">Demonlist</h1>
+  <a class="brand" href="#level-1">
+    <img src="icon.png" alt="" width="28" height="28">
+    <h1 id="title">Sundown Demonlist</h1>
+  </a>
   <nav class="nav" aria-label="Views">
     <a href="#level-1" id="tabList">List</a>
     <a href="#leaderboard" id="tabLb">Leaderboard</a>
