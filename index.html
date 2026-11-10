@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sundown Demonlist</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* =====================================================================
+   THEME — edit colors here.
+   Dark is the default. The light block applies when the theme toggle
+   (top right) is set to light. Every color on the page comes from these.
+   ===================================================================== */
+:root {
+  --bg:            #101114;  /* page background */
+  --surface:       #17181c;  /* panels */
+  --surface-hover: #1e2025;  /* hovered rows */
+  --border:        #2a2c33;  /* lines and outlines */
+  --text:          #e4e5e9;  /* main text */
+  --text-muted:    #8d909a;  /* labels, secondary text */
+  --accent:        #5b8def;  /* links, selected row, active tab */
+  --on-accent:     #ffffff;  /* text on top of the accent color */
+  --points:        #e0b84a;  /* list points */
+  --complete:      #5cbf85;  /* 100% records */
+  --warning:       #e8954f;  /* list.json problems */
+  --epic:          #e8794a;  /* "Epic" label */
+  --featured:      #e0b84a;  /* "Featured" label */
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg:            #f4f4f6;
+  --surface:       #ffffff;
+  --surface-hover: #f0f1f4;
+  --border:        #dfe0e5;
+  --text:          #1b1c20;
+  --text-muted:    #696c76;
+  --accent:        #2f68d8;
+  --on-accent:     #ffffff;
+  --points:        #a77a0c;
+  --complete:      #23864d;
+  --warning:       #b8611c;
+  --epic:          #c4501f;
+  --featured:      #a77a0c;
+  color-scheme: light;
+}
+/* ===================================================================== */
+
+:root {
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 8px;
+  --selected: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 var(--font);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 16px;
+}
+button { font: inherit; color: inherit; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Header */
+.top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-block: 14px; }
+.top h1 { margin: 0; font-size: 18px; font-weight: 700; }
+.nav { display: flex; gap: 20px; }
+.nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; padding-block: 4px; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--text); }
+.nav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.theme-btn {
+  margin-left: auto; display: inline-grid; place-items: center; width: 32px; height: 32px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0; cursor: pointer; color: var(--text-muted);
+}
+.theme-btn:hover { color: var(--text); }
+.theme-btn svg { width: 16px; height: 16px; }
+
+.notice {
+  margin-bottom: 12px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px;
+  background: var(--surface); border: 1px solid var(--warning);
+}
+.notice strong { color: var(--warning); }
+.notice ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-muted); }
+
+/* Three panes */
+.app {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: minmax(250px, 310px) minmax(0, 1fr) minmax(250px, 320px); gap: 12px;
+}
+.pane {
+  min-width: 0; min-height: 0; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.pane-head {
+  position: sticky; top: 0; z-index: 2; background: var(--surface);
+  border-bottom: 1px solid var(--border); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.pane-head h2 { margin: 0; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; }
+.pane-head h2 span { color: var(--text-muted); font-weight: 400; }
+.search {
+  width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font: inherit;
+}
+.search::placeholder { color: var(--text-muted); }
+.diff-select {
+  width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font: inherit;
+}
+
+/* Level list */
+.list { list-style: none; margin: 0; padding: 4px; }
+.row {
+  display: grid; grid-template-columns: 32px 36px minmax(0, 1fr); align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 6px; text-decoration: none; color: inherit;
+}
+.row:hover { background: var(--surface-hover); }
+.row[aria-current="true"] { background: var(--selected); }
+.row img { width: 36px; height: 36px; }
+.row .rank { color: var(--text-muted); font-size: 13px; text-align: right; }
+.row[aria-current="true"] .rank { color: var(--accent); font-weight: 600; }
+.row .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .sub { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty { color: var(--text-muted); padding: 16px; text-align: center; font-size: 13px; margin: 0; }
+
+/* Level sheet */
+.sheet { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 760px; }
+.hero { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 16px; align-items: center; }
+.hero img { width: 88px; height: 88px; }
+.hero h3 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; text-wrap: balance; overflow-wrap: anywhere; }
+.hero .line { color: var(--text-muted); margin-top: 4px; }
+.hero .line b { color: var(--text); font-weight: 500; }
+.rating-epic { color: var(--epic); font-weight: 600; }
+.rating-featured { color: var(--featured); font-weight: 600; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px 20px; margin: 0; padding-top: 16px; border-top: 1px solid var(--border); }
+.facts dt { font-size: 12px; color: var(--text-muted); }
+.facts dd { margin: 2px 0 0; font-weight: 500; overflow-wrap: anywhere; }
+.facts dd.pts { color: var(--points); font-weight: 600; }
+.facts dd a { color: inherit; }
+.copy { background: none; border: 0; padding: 0; cursor: pointer; font-weight: 500; border-bottom: 1px dotted var(--text-muted); }
+.copy:hover { color: var(--accent); border-color: var(--accent); }
+.copied { color: var(--text-muted); font-size: 12px; font-weight: 400; margin-left: 6px; }
+
+.video-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; text-decoration: none; }
+.video-link:hover { text-decoration: underline; }
+.video-link svg { width: 14px; height: 14px; fill: currentColor; }
+
+.section-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+.tags { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 12px; align-items: baseline; padding-top: 16px; border-top: 1px solid var(--border); }
+.tags > span { color: var(--text-muted); font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 5px;
+  border: 1px solid var(--border); font-size: 13px;
+}
+.chip small { color: var(--text-muted); }
+
+/* Records */
+.rec-table { width: 100%; border-collapse: collapse; }
+.rec-table th, .rec-table td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.rec-table th { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.rec-table td.num, .rec-table th.num { text-align: right; }
+.rec-table td.done { color: var(--complete); font-weight: 600; }
+.rec-table a { color: inherit; text-decoration: none; }
+.rec-table a:hover { color: var(--accent); }
+.rec-table .who { max-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rec-table .badge { color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+.rec-table .vid a { color: var(--accent); }
+
+/* Leaderboard */
+.lb-row { grid-template-columns: 32px minmax(0, 1fr) auto; }
+.lb-row .pts { color: var(--points); font-size: 13px; font-weight: 500; }
+.points-table { width: 100%; border-collapse: collapse; }
+.points-table th, .points-table td { padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.points-table th { font-size: 12px; font-weight: 500; color: var(--text-muted); position: sticky; top: 0; background: var(--surface); }
+.points-table td:last-child, .points-table th:last-child { text-align: right; }
+.points-table td:last-child { color: var(--points); }
+.points-table a { color: inherit; text-decoration: none; }
+.points-table a:hover { color: var(--accent); }
+
+.plist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.plist a { display: grid; grid-template-columns: 40px 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; text-decoration: none; color: inherit; padding: 6px 4px; border-bottom: 1px solid var(--border); }
+.plist a:hover { background: var(--surface-hover); }
+.plist img { width: 28px; height: 28px; }
+.plist .rk { color: var(--text-muted); font-size: 13px; text-align: right; }
+.plist .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plist .r { font-size: 13px; text-align: right; color: var(--points); }
+.plist .r small { color: var(--text-muted); margin-right: 8px; }
+
+@media (max-width: 1080px) {
+  .app { grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); }
+  .pane.right { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .pane { overflow: visible; }
+  .pane.left { max-height: 46vh; overflow: auto; }
+  .hero { grid-template-columns: 64px minmax(0, 1fr); }
+  .hero img { width: 64px; height: 64px; }
+  .hero h3 { font-size: 22px; }
+  .sheet { padding: 16px; }
+  .tags { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .tags > span:not(:first-child) { margin-top: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1 id="title">Demonlist</h1>
+  <nav class="nav" aria-label="Views">
+    <a href="#level-1" id="tabList">List</a>
+    <a href="#leaderboard" id="tabLb">Leaderboard</a>
+  </nav>
+  <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button>
+</header>
+<div id="notice" class="notice" hidden></div>
+
+<main class="app">
+  <section class="pane left" id="left" aria-label="Levels"></section>
+  <section class="pane mid" id="mid" aria-label="Level details"></section>
+  <section class="pane right" id="right" aria-label="Records"></section>
+</main>
+
+<script>
+(() => {
+  // ---------- theme (dark by default) ----------
+  const SUN = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6 13 13M3 13l1.4-1.4M11.6 4.4 13 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const MOON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    const btn = document.getElementById("themeBtn");
+    btn.innerHTML = t === "dark" ? SUN : MOON;
+    btn.title = t === "dark" ? "Light theme" : "Dark theme";
+    btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+  }
+  let theme = "dark";
+  try { theme = localStorage.getItem("dl-theme") === "light" ? "light" : "dark"; } catch (e) {}
+  applyTheme(theme);
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    theme = theme === "dark" ? "light" : "dark";
+    applyTheme(theme);
+    try { localStorage.setItem("dl-theme", theme); } catch (e) {}
+  });
+
+  // ---------- allowed values ----------
+  const DIFFS = ["easy", "medium", "hard", "insane", "extreme"];
+  const RATINGS = { rated: "stars", featured: "featured", epic: "epic" };
+  const RATING_LABEL = { rated: "Rated", featured: "Featured", epic: "Epic" };
+  const LENGTHS = {
+    tiny: ["Tiny", "< 10s"], short: ["Short", "10–29s"], medium: ["Medium", "30–59s"],
+    long: ["Long", "1–2 min"], xl: ["XL", "2 min+"]
+  };
+  const MODES = ["cube", "ship", "ball", "ufo", "wave", "robot"];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const slug = (s) => String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const fmt = (n) => n.toFixed(2);
+  const modeName = (m) => (m === "ufo" ? "UFO" : cap(m));
+
+  let DATA, LEVELS = [], PLAYERS = [], cfg, query = "", diffFilter = "";
+  const problems = [];
+
+  const iconFor = (lv) => (cfg.iconBase || "icons/") + RATINGS[lv.rating] + "-" + lv.difficulty + ".webp";
+  function pointsFor(rank) {
+    const p = cfg.points || {};
+    return Math.max(p.minimum ?? 1, (p.top ?? 250) * Math.pow(p.decay ?? 0.92, rank - 1));
+  }
+  function recordPoints(lv, rec) {
+    if (rec.percent >= 100) return lv.points;
+    if (rec.percent >= lv.requirement) return lv.points * (cfg.points?.progressFactor ?? 0) * rec.percent / 100;
+    return 0;
+  }
+
+  function validate(raw, i) {
+    const where = `#${i + 1} ${raw.name || "(unnamed)"}`;
+    const lv = { ...raw };
+    lv.difficulty = String(lv.difficulty || "").toLowerCase();
+    if (!DIFFS.includes(lv.difficulty)) { problems.push(`${where}: difficulty "${raw.difficulty}" should be one of ${DIFFS.join(", ")}. Showing it as hard.`); lv.difficulty = "hard"; }
+    lv.rating = String(lv.rating || "rated").toLowerCase();
+    if (!RATINGS[lv.rating]) {
+      problems.push(`${where}: rating "${raw.rating}" isn't valid. Showing it as epic.`);
+      lv.rating = "epic";
+    }
+    lv.length = String(lv.length || "").toLowerCase();
+    if (!LENGTHS[lv.length]) {
+      problems.push(`${where}: length "${raw.length}" isn't valid.`);
+      lv.length = null;
+    }
+    lv.gamemodes = (lv.gamemodes || []).map((m) => String(m).toLowerCase()).filter((m) => {
+      if (MODES.includes(m)) return true;
+      problems.push(`${where}: gamemode "${m}" isn't valid, removed.`);
+      return false;
+    });
+    const allowedSk = (cfg.allowedSkillsets || []).map((s) => s.toLowerCase());
+    lv.skillsets = (lv.skillsets || []).filter((s) => {
+      if (!allowedSk.length || allowedSk.includes(String(s).toLowerCase())) return true;
+      problems.push(`${where}: skillset "${s}" isn't in settings.allowedSkillsets, removed.`);
+      return false;
+    });
+    lv.creators = Array.isArray(lv.creators) ? lv.creators : (lv.creators ? [lv.creators] : []);
+    lv.requirement = Number(lv.requirement ?? 100);
+    lv.rank = i + 1;
+    lv.points = pointsFor(lv.rank);
+    lv.records = (lv.records || [])
+      .map((r) => ({ ...r, percent: Number(r.percent) }))
+      .filter((r) => {
+        if (r.percent >= lv.requirement) return true;
+        problems.push(`${where}: ${r.player}'s ${r.percent}% is under the ${lv.requirement}% requirement, hidden.`);
+        return false;
+      })
+      .sort((a, b) => b.percent - a.percent || (a.player === lv.verifier ? -1 : b.player === lv.verifier ? 1 : 0));
+    lv.records.forEach((r) => (r.points = recordPoints(lv, r)));
+    lv.slug = "level-" + lv.rank;
+    return lv;
+  }
+
+  function buildPlayers() {
+    const map = new Map();
+    for (const lv of LEVELS) for (const r of lv.records) {
+      const key = slug(r.player);
+      if (!map.has(key)) map.set(key, { name: r.player, key, slug: "player-" + key, points: 0, done: [], progress: [] });
+      const p = map.get(key);
+      (r.percent >= 100 ? p.done : p.progress).push({ lv, r });
+      p.points += r.points;
+    }
+    PLAYERS = [...map.values()].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+    PLAYERS.forEach((p, i) => (p.rank = i + 1));
+  }
+
+  const playerLink = (name) => `<a href="#player-${slug(name)}">${esc(name)}</a>`;
+
+  // ---------- list view ----------
+  function renderLevelList(current) {
+    const q = query.trim().toLowerCase();
+    const shown = LEVELS.filter((lv) =>
+      (!diffFilter || lv.difficulty === diffFilter) &&
+      (!q || [lv.name, ...lv.creators, lv.verifier, ...lv.skillsets, ...lv.gamemodes].join(" ").toLowerCase().includes(q))
+    );
+    $("left").innerHTML = `
+      <div class="pane-head">
+        <h2>Levels <span>${shown.length === LEVELS.length ? LEVELS.length : `${shown.length} of ${LEVELS.length}`}</span></h2>
+        <input id="q" class="search" type="search" placeholder="Search" value="${esc(query)}" aria-label="Search levels, creators or tags">
+        <select id="diff" class="diff-select" aria-label="Difficulty">
+          <option value="">All difficulties</option>
+          ${DIFFS.map((d) => `<option value="${d}" ${diffFilter === d ? "selected" : ""}>${cap(d)} demons</option>`).join("")}
+        </select>
+      </div>
+      ${shown.length ? `<ol class="list">${shown.map((lv) => `
+        <li><a class="row" href="#${lv.slug}" aria-current="${lv === current}">
+          <span class="rank">${lv.rank}</span>
+          <img src="${esc(iconFor(lv))}" alt="${cap(lv.difficulty)} demon" loading="lazy" width="36" height="36">
+          <span style="min-width:0">
+            <span class="name" style="display:block">${esc(lv.name)}</span>
+            <span class="sub" style="display:block">${esc(lv.creators.join(", ") || "Unknown")}</span>
+          </span>
+        </a></li>`).join("")}</ol>` : `<p class="empty">No levels match your search.</p>`}`;
+    $("q").addEventListener("input", (e) => {
+      query = e.target.value; const pos = e.target.selectionStart;
+      renderLevelList(current); const n = $("q"); n.focus(); n.setSelectionRange(pos, pos);
+    });
+    $("diff").addEventListener("change", (e) => { diffFilter = e.target.value; renderLevelList(current); });
+  }
+
+  function renderLevel(lv) {
+    const len = lv.length ? LENGTHS[lv.length] : null;
+    const done = lv.records.filter((r) => r.percent >= 100).length;
+    const ratingCls = lv.rating === "rated" ? "" : `rating-${lv.rating}`;
+    $("mid").innerHTML = `
+      <article class="sheet">
+        <div class="hero">
+          <img src="${esc(iconFor(lv))}" alt="${cap(lv.difficulty)} demon" width="88" height="88">
+          <div style="min-width:0">
+            <h3>#${lv.rank} – ${esc(lv.name)}</h3>
+            <div class="line">by <b>${esc(lv.creators.join(", ") || "Unknown")}</b></div>
+            <div class="line">${cap(lv.difficulty)} Demon · <span class="${ratingCls}">${RATING_LABEL[lv.rating]}</span></div>
+          </div>
+        </div>
+
+        ${lv.video
+          ? `<a class="video-link" href="${esc(lv.video)}" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.8v12.4L14 8z"/></svg>Watch verification</a>`
+          : ""}
+
+        <dl class="facts">
+          <div><dt>Points</dt><dd class="pts">${fmt(lv.points)}</dd></div>
+          <div><dt>Level ID</dt><dd>${lv.id ? `<button class="copy" type="button" data-copy="${esc(lv.id)}" title="Copy ID">${esc(lv.id)}</button><span class="copied" id="copied"></span>` : "–"}</dd></div>
+          <div><dt>Verifier</dt><dd>${lv.verifier ? playerLink(lv.verifier) : "–"}</dd></div>
+          <div><dt>Publisher</dt><dd>${esc(lv.publisher || "–")}</dd></div>
+          <div><dt>Requirement</dt><dd>${lv.requirement}%</dd></div>
+          <div><dt>Completions</dt><dd>${done}</dd></div>
+        </dl>
+
+        <div class="tags">
+          <span>Length</span>
+          <div class="chips">${len ? `<span class="chip">${len[0]} <small>${len[1]}</small></span>` : "–"}</div>
+          <span>Gamemodes</span>
+          <div class="chips">${lv.gamemodes.length ? lv.gamemodes.map((m) => `<span class="chip">${modeName(m)}</span>`).join("") : "–"}</div>
+          <span>Skillsets</span>
+          <div class="chips">${lv.skillsets.length ? lv.skillsets.map((s) => `<span class="chip">${esc(s)}</span>`).join("") : "–"}</div>
+        </div>
+      </article>`;
+    const c = $("mid").querySelector("[data-copy]");
+    if (c) c.addEventListener("click", () => {
+      navigator.clipboard?.writeText(c.dataset.copy).then(() => ($("copied").textContent = "Copied"), () => {});
+    });
+  }
+
+  function renderRecords(lv) {
+    $("right").innerHTML = `
+      <div class="pane-head"><h2>Records <span>${lv.records.length}</span></h2></div>
+      ${lv.records.length ? `
+        <table class="rec-table">
+          <thead><tr><th>Player</th><th class="num">%</th><th class="num">Video</th></tr></thead>
+          <tbody>${lv.records.map((r) => `
+            <tr>
+              <td class="who">${playerLink(r.player)}${r.player === lv.verifier && r.percent >= 100 ? `<span class="badge">verifier</span>` : ""}${r.mobile ? `<span class="badge">mobile</span>` : ""}</td>
+              <td class="num ${r.percent >= 100 ? "done" : ""}">${r.percent}%</td>
+              <td class="num vid">${r.video ? `<a href="${esc(r.video)}" target="_blank" rel="noopener">Link</a>` : "–"}</td>
+            </tr>`).join("")}</tbody>
+        </table>` : `<p class="empty">No records yet.</p>`}`;
+  }
+
+  // ---------- leaderboard view ----------
+  function renderLeaderboard(current) {
+    $("left").innerHTML = `
+      <div class="pane-head"><h2>Players <span>${PLAYERS.length}</span></h2></div>
+      ${PLAYERS.length ? `<ol class="list">${PLAYERS.map((p) => `
+        <li><a class="row lb-row" href="#${p.slug}" aria-current="${p === current}">
+          <span class="rank">${p.rank}</span>
+          <span style="min-width:0"><span class="name" style="display:block">${esc(p.name)}</span><span class="sub" style="display:block">${p.done.length} completed</span></span>
+          <span class="pts">${fmt(p.points)}</span>
+        </a></li>`).join("")}</ol>` : `<p class="empty">No records yet.</p>`}`;
+  }
+
+  function renderPlayer(p) {
+    if (!p) { $("mid").innerHTML = `<p class="empty">No players yet.</p>`; return; }
+    const hardest = p.done[0]?.lv;
+    const verified = LEVELS.filter((l) => l.verifier && slug(l.verifier) === p.key).length;
+    const item = ({ lv, r }) => `
+      <li><a href="#${lv.slug}">
+        <span class="rk">#${lv.rank}</span>
+        <img src="${esc(iconFor(lv))}" alt="" width="28" height="28" loading="lazy">
+        <span class="nm">${esc(lv.name)}</span>
+        <span class="r">${r.percent < 100 ? `<small>${r.percent}%</small>` : ""}${fmt(r.points)}</span>
+      </a></li>`;
+    $("mid").innerHTML = `
+      <article class="sheet">
+        <div class="hero">
+          ${hardest ? `<img src="${esc(iconFor(hardest))}" alt="" width="88" height="88">` : `<span></span>`}
+          <div style="min-width:0">
+            <h3>${esc(p.name)}</h3>
+            <div class="line">Rank #${p.rank}${hardest ? ` · Hardest: <b>${esc(hardest.name)}</b>` : ""}</div>
+          </div>
+        </div>
+        <dl class="facts">
+          <div><dt>Points</dt><dd class="pts">${fmt(p.points)}</dd></div>
+          <div><dt>Completed</dt><dd>${p.done.length}</dd></div>
+          <div><dt>In progress</dt><dd>${p.progress.length}</dd></div>
+          <div><dt>Verified</dt><dd>${verified}</dd></div>
+        </dl>
+        <section>
+          <h4 class="section-title">Completed levels</h4>
+          ${p.done.length ? `<ul class="plist">${p.done.map(item).join("")}</ul>` : `<p class="empty">None yet.</p>`}
+        </section>
+        ${p.progress.length ? `<section><h4 class="section-title">Progress</h4><ul class="plist">${p.progress.map(item).join("")}</ul></section>` : ""}
+      </article>`;
+  }
+
+  function renderPointsTable() {
+    $("right").innerHTML = `
+      <div class="pane-head"><h2>Points per level</h2></div>
+      <div style="overflow-x:auto"><table class="points-table">
+        <thead><tr><th>#</th><th>Level</th><th>Points</th></tr></thead>
+        <tbody>${LEVELS.map((lv) => `<tr><td>${lv.rank}</td><td><a href="#${lv.slug}">${esc(lv.name)}</a></td><td>${fmt(lv.points)}</td></tr>`).join("")}</tbody>
+      </table></div>`;
+  }
+
+  // ---------- routing ----------
+  function route() {
+    const h = location.hash.slice(1);
+    const lbView = h === "leaderboard" || h.startsWith("player-");
+    $("tabList").setAttribute("aria-current", lbView ? "false" : "page");
+    $("tabLb").setAttribute("aria-current", lbView ? "page" : "false");
+    if (!LEVELS.length) {
+      $("left").innerHTML = `<p class="empty">The list is empty. Add levels to list.json.</p>`;
+      $("mid").innerHTML = ""; $("right").innerHTML = ""; return;
+    }
+    if (lbView) {
+      const p = PLAYERS.find((x) => x.slug === h) || PLAYERS[0];
+      renderLeaderboard(p); renderPlayer(p); renderPointsTable();
+    } else {
+      const lv = LEVELS.find((x) => x.slug === h) || LEVELS[0];
+      renderLevelList(lv); renderLevel(lv); renderRecords(lv);
+      $("tabList").href = "#" + lv.slug;
+      const cur = $("left").querySelector('[aria-current="true"]');
+      if (cur && window.innerWidth > 760) cur.scrollIntoView({ block: "nearest" });
+    }
+    if (window.innerWidth <= 760 && h) $("mid").scrollIntoView({ block: "start" });
+  }
+
+  function showProblems() {
+    if (!problems.length) return;
+    $("notice").innerHTML = `<strong>list.json has ${problems.length} problem${problems.length > 1 ? "s" : ""}</strong><ul>${problems.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>`;
+    $("notice").hidden = false;
+  }
+
+  async function boot() {
+    try {
+      const res = await fetch("list.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      DATA = await res.json();
+    } catch (e) {
+      $("notice").innerHTML = `<strong>Couldn't load list.json.</strong> Keep it next to index.html and open the site through a web server (GitHub Pages, Netlify, <code>npx serve</code>). Browsers block it when the file is opened straight from disk. (${esc(e.message)})`;
+      $("notice").hidden = false;
+      return;
+    }
+    cfg = DATA.settings || {};
+    document.title = cfg.title || "Demonlist";
+    $("title").textContent = cfg.title || "Demonlist";
+    LEVELS = (DATA.levels || []).map(validate);
+    buildPlayers();
+    showProblems();
+    route();
+  }
+  window.addEventListener("hashchange", route);
+  boot();
+})();
+</script>
+</body>
+</html>

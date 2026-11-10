@@ -1,0 +1,57 @@
+{
+  "_help": [
+    "Edit this file to change the list. Levels are ranked by their order in 'levels': the first entry is #1.",
+    "difficulty: easy | medium | hard | insane | extreme",
+    "rating: rated | featured | epic",
+    "length: tiny | short | medium | long | xl",
+    "gamemodes: cube | ship | ball | ufo | wave | robot",
+    "skillsets: see 'allowedSkillsets' in settings; add your own there",
+    "records: percent 100 = completion. Progress records need percent >= the level's 'requirement'.",
+    "video: any URL (YouTube etc.) or null. id: the in-game level ID or null.",
+    "points: #1 gets settings.points.top; each rank below multiplies by settings.points.decay."
+  ],
+  "settings": {
+    "title": "Sundown Demonlist",
+    "iconBase": "icons/",
+    "points": {
+      "top": 500,
+      "decay": 0.92,
+      "minimum": 1,
+      "progressFactor": 0.33
+    },
+    "allowedSkillsets": [
+      "Timings",
+      "Memory",
+      "Wave Spam",
+      "Straight Fly",
+      "Fast-Paced",
+      "Slow-Paced",
+      "Flow",
+      "Nerve Control",
+      "Chokepoints",
+      "High CPS",
+      "Duals",
+      "Gimmicky",
+      "Overall"
+    ]
+  },
+  "levels": [
+    {
+      "name": "title unmastered",
+      "id": 1000000,
+      "creators": ["ddusk"],
+      "verifier": "ddusk",
+      "publisher": "ddusk",
+      "video": null,
+      "difficulty": "easy",
+      "rating": "epic",
+      "length": "long",
+      "gamemodes": ["cube", "ship", "ball"],
+      "skillsets": ["Slow-Paced"],
+      "requirement": 75,
+      "records": [
+        { "player": "ddusk", "percent": 100, "video": null }
+      ]
+    }
+  ]
+}
