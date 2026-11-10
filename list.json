@@ -48,7 +48,7 @@
       "length": "long",
       "gamemodes": ["cube", "ship", "ball"],
       "skillsets": ["Slow-Paced"],
-      "requirement": 75,
+      "requirement": 100,
       "records": [
         { "player": "ddusk", "percent": 100, "video": null }
       ]
