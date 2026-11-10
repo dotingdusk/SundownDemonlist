@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sundown Demonlist</title>
+<title>SundownDL</title>
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,6 +54,7 @@
   --selected: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   background: var(--bg);
@@ -75,7 +76,7 @@ a { color: var(--accent); }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
 .brand img { width: 28px; height: 28px; display: block; }
 .top h1 { margin: 0; font-size: 18px; font-weight: 700; }
-.nav { display: flex; gap: 20px; }
+.nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; padding-block: 4px; border-bottom: 2px solid transparent; }
 .nav a:hover { color: var(--text); }
 .nav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
@@ -124,7 +125,7 @@ a { color: var(--accent); }
 /* Level list */
 .list { list-style: none; margin: 0; padding: 4px; }
 .row {
-  display: grid; grid-template-columns: 32px 36px minmax(0, 1fr); align-items: center; gap: 8px;
+  display: grid; grid-template-columns: 36px 36px minmax(0, 1fr); align-items: center; gap: 8px;
   padding: 5px 8px; border-radius: 6px; text-decoration: none; color: inherit;
 }
 .row:hover { background: var(--surface-hover); }
@@ -134,6 +135,34 @@ a { color: var(--accent); }
 .row[aria-current="true"] .rank { color: var(--accent); font-weight: 600; }
 .row .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .sub { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row.est .name { color: var(--text-muted); font-style: italic; }
+.est-note { font-style: italic; }
+
+/* Filters */
+.frow { display: flex; gap: 6px; }
+.fbtn {
+  padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg);
+  cursor: pointer; font-size: 13px;
+}
+.fbtn[aria-expanded="true"] { border-color: var(--accent); }
+.fbtn.plain { background: none; border-color: transparent; color: var(--text-muted); }
+.fbtn.plain:hover { color: var(--text); }
+.fpanel { display: flex; flex-direction: column; gap: 10px; padding-top: 2px; }
+.flabel { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.flabel small { opacity: 0.8; }
+.fchips { display: flex; flex-wrap: wrap; gap: 4px; }
+.fchip {
+  padding: 2px 8px; border-radius: 5px; border: 1px solid var(--border); background: none;
+  font-size: 12.5px; cursor: pointer; color: var(--text-muted);
+}
+.fchip:hover { color: var(--text); }
+.fchip[aria-pressed="true"] { background: var(--selected); border-color: var(--accent); color: var(--text); }
+
+/* Leaderboard list switch */
+.seg { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.seg a { flex: 1; text-align: center; padding: 5px 8px; font-size: 13px; color: var(--text-muted); text-decoration: none; }
+.seg a + a { border-left: 1px solid var(--border); }
+.seg a[aria-current="true"] { background: var(--selected); color: var(--text); }
 .empty { color: var(--text-muted); padding: 16px; text-align: center; font-size: 13px; margin: 0; }
 
 /* Level sheet */
@@ -184,7 +213,7 @@ a { color: var(--accent); }
 .rec-table .vid a { color: var(--accent); }
 
 /* Leaderboard */
-.lb-row { grid-template-columns: 32px minmax(0, 1fr) auto; }
+.lb-row { grid-template-columns: 36px minmax(0, 1fr) auto; }
 .lb-row .pts { color: var(--points); font-size: 13px; font-weight: 500; }
 .points-table { width: 100%; border-collapse: collapse; }
 .points-table th, .points-table td { padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -203,6 +232,9 @@ a { color: var(--accent); }
 .plist .r { font-size: 13px; text-align: right; color: var(--points); }
 .plist .r small { color: var(--text-muted); margin-right: 8px; }
 
+@media (min-width: 1081px) {
+  .app.no-right { grid-template-columns: minmax(250px, 310px) minmax(0, 1fr); }
+}
 @media (max-width: 1080px) {
   .app { grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); }
   .pane.right { grid-column: 1 / -1; }
@@ -226,10 +258,11 @@ a { color: var(--accent); }
 <header class="top">
   <a class="brand" href="#level-1">
     <img src="icon.png" alt="" width="28" height="28">
-    <h1 id="title">Sundown Demonlist</h1>
+    <h1 id="title">SundownDL</h1>
   </a>
   <nav class="nav" aria-label="Views">
-    <a href="#level-1" id="tabList">List</a>
+    <a href="#level-1" id="tabList">Main list</a>
+    <a href="#challenge-1" id="tabChallenges">Challenges</a>
     <a href="#leaderboard" id="tabLb">Leaderboard</a>
   </nav>
   <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme"></button>
@@ -273,12 +306,20 @@ a { color: var(--accent); }
   };
   const MODES = ["cube", "ship", "ball", "ufo", "wave", "robot"];
 
+  // The two lists on the site. `key` is the field in list.json, `prefix` is used in links (#level-3, #challenge-2).
+  const LISTS = {
+    main: { key: "levels", prefix: "level", label: "Main list", noun: "Levels" },
+    challenges: { key: "challenges", prefix: "challenge", label: "Challenges", noun: "Challenges" }
+  };
+
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const slug = (s) => String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
+  const slug = (s) => String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "x";
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const fmt = (n) => n.toFixed(2);
   const modeName = (m) => (m === "ufo" ? "UFO" : cap(m));
+  const rankText = (lv) => (lv.rank ? "#" + lv.rank : "#-");
+
   // Turns a YouTube link (youtu.be, watch?v=, shorts, embed, live) into an embed URL. Returns null for anything else.
   function youtubeEmbed(url) {
     try {
@@ -304,35 +345,38 @@ a { color: var(--accent); }
     return `<a class="video-link" href="${esc(url)}" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.8v12.4L14 8z"/></svg>Watch verification</a>`;
   }
 
-  let DATA, LEVELS = [], PLAYERS = [], cfg, query = "", diffFilter = "";
+  let DATA, cfg, PLAYERS = [];
+  const DATASETS = { main: [], challenges: [] };
   const problems = [];
+  let query = "";
+  let filtersOpen = false;
+  const filters = { difficulty: new Set(), length: new Set(), gamemodes: new Set(), skillsets: new Set() };
+  let lbList = "main";
 
   const iconFor = (lv) => (cfg.iconBase || "icons/") + RATINGS[lv.rating] + "-" + lv.difficulty + ".webp";
-  function pointsFor(rank) {
-    const p = cfg.points || {};
+  const pointCfg = (list) => (list === "challenges" ? cfg.challengePoints || cfg.points : cfg.points) || {};
+  function pointsFor(list, rank) {
+    if (!rank) return 0;
+    const p = pointCfg(list);
     return Math.max(p.minimum ?? 1, (p.top ?? 250) * Math.pow(p.decay ?? 0.92, rank - 1));
   }
-  function recordPoints(lv, rec) {
+  function recordPoints(list, lv, rec) {
+    if (!lv.rank) return 0;
     if (rec.percent >= 100) return lv.points;
-    if (rec.percent >= lv.requirement) return lv.points * (cfg.points?.progressFactor ?? 0) * rec.percent / 100;
+    if (rec.percent >= lv.requirement) return lv.points * (pointCfg(list).progressFactor ?? 0) * rec.percent / 100;
     return 0;
   }
 
-  function validate(raw, i) {
-    const where = `#${i + 1} ${raw.name || "(unnamed)"}`;
-    const lv = { ...raw };
+  function validate(list, raw, i, counter, usedSlugs) {
+    const L = LISTS[list];
+    const where = `${L.label} entry ${i + 1} (${raw.name || "unnamed"})`;
+    const lv = { ...raw, list };
     lv.difficulty = String(lv.difficulty || "").toLowerCase();
     if (!DIFFS.includes(lv.difficulty)) { problems.push(`${where}: difficulty "${raw.difficulty}" should be one of ${DIFFS.join(", ")}. Showing it as hard.`); lv.difficulty = "hard"; }
     lv.rating = String(lv.rating || "rated").toLowerCase();
-    if (!RATINGS[lv.rating]) {
-      problems.push(`${where}: rating "${raw.rating}" isn't valid. Showing it as epic.`);
-      lv.rating = "epic";
-    }
+    if (!RATINGS[lv.rating]) { problems.push(`${where}: rating "${raw.rating}" isn't valid. Showing it as epic.`); lv.rating = "epic"; }
     lv.length = String(lv.length || "").toLowerCase();
-    if (!LENGTHS[lv.length]) {
-      problems.push(`${where}: length "${raw.length}" isn't valid.`);
-      lv.length = null;
-    }
+    if (!LENGTHS[lv.length]) { problems.push(`${where}: length "${raw.length}" isn't valid.`); lv.length = null; }
     lv.gamemodes = (lv.gamemodes || []).map((m) => String(m).toLowerCase()).filter((m) => {
       if (MODES.includes(m)) return true;
       problems.push(`${where}: gamemode "${m}" isn't valid, removed.`);
@@ -346,8 +390,17 @@ a { color: var(--accent); }
     });
     lv.creators = Array.isArray(lv.creators) ? lv.creators : (lv.creators ? [lv.creators] : []);
     lv.requirement = Number(lv.requirement ?? 100);
-    lv.rank = i + 1;
-    lv.points = pointsFor(lv.rank);
+    lv.estimate = lv.estimate === true;
+    lv.rank = lv.estimate ? null : ++counter.n;
+    lv.points = pointsFor(list, lv.rank);
+    let s = L.prefix + "-" + (lv.rank ? lv.rank : "est-" + slug(lv.name || "level"));
+    while (usedSlugs.has(s)) s += "-2";
+    usedSlugs.add(s);
+    lv.slug = s;
+    if (lv.estimate && (lv.records || []).length) {
+      problems.push(`${where}: estimate levels don't have records, ${lv.records.length} ignored.`);
+      lv.records = [];
+    }
     lv.records = (lv.records || [])
       .map((r) => ({ ...r, percent: Number(r.percent) }))
       .filter((r) => {
@@ -356,56 +409,103 @@ a { color: var(--accent); }
         return false;
       })
       .sort((a, b) => b.percent - a.percent || (a.player === lv.verifier ? -1 : b.player === lv.verifier ? 1 : 0));
-    lv.records.forEach((r) => (r.points = recordPoints(lv, r)));
-    lv.slug = "level-" + lv.rank;
+    lv.records.forEach((r) => (r.points = recordPoints(list, lv, r)));
     return lv;
   }
 
   function buildPlayers() {
     const map = new Map();
-    for (const lv of LEVELS) for (const r of lv.records) {
+    for (const list of Object.keys(LISTS)) for (const lv of DATASETS[list]) for (const r of lv.records) {
       const key = slug(r.player);
-      if (!map.has(key)) map.set(key, { name: r.player, key, slug: "player-" + key, points: 0, done: [], progress: [] });
+      if (!map.has(key)) map.set(key, {
+        name: r.player, key, slug: "player-" + key,
+        points: { main: 0, challenges: 0 }, rank: { main: null, challenges: null },
+        done: { main: [], challenges: [] }, progress: { main: [], challenges: [] }
+      });
       const p = map.get(key);
-      (r.percent >= 100 ? p.done : p.progress).push({ lv, r });
-      p.points += r.points;
+      (r.percent >= 100 ? p.done : p.progress)[list].push({ lv, r });
+      p.points[list] += r.points;
     }
-    PLAYERS = [...map.values()].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
-    PLAYERS.forEach((p, i) => (p.rank = i + 1));
+    PLAYERS = [...map.values()];
+    for (const list of Object.keys(LISTS)) {
+      PLAYERS.filter((p) => p.done[list].length || p.progress[list].length)
+        .sort((a, b) => b.points[list] - a.points[list] || a.name.localeCompare(b.name))
+        .forEach((p, i) => (p.rank[list] = i + 1));
+    }
   }
+  const leaderboardFor = (list) =>
+    PLAYERS.filter((p) => p.rank[list]).sort((a, b) => a.rank[list] - b.rank[list]);
 
   const playerLink = (name) => `<a href="#player-${slug(name)}">${esc(name)}</a>`;
 
-  // ---------- list view ----------
-  function renderLevelList(current) {
+  // ---------- filters ----------
+  const activeFilterCount = () => Object.values(filters).reduce((n, s) => n + s.size, 0);
+  function matches(lv) {
     const q = query.trim().toLowerCase();
-    const shown = LEVELS.filter((lv) =>
-      (!diffFilter || lv.difficulty === diffFilter) &&
-      (!q || [lv.name, ...lv.creators, lv.verifier, ...lv.skillsets, ...lv.gamemodes].join(" ").toLowerCase().includes(q))
-    );
+    if (q && ![lv.name, ...lv.creators, lv.verifier, ...lv.skillsets, ...lv.gamemodes].join(" ").toLowerCase().includes(q)) return false;
+    if (filters.difficulty.size && !filters.difficulty.has(lv.difficulty)) return false;
+    if (filters.length.size && !filters.length.has(lv.length)) return false;
+    for (const m of filters.gamemodes) if (!lv.gamemodes.includes(m)) return false;
+    for (const s of filters.skillsets) if (!lv.skillsets.some((x) => x.toLowerCase() === s.toLowerCase())) return false;
+    return true;
+  }
+  function filterGroup(name, label, values, labelFn, hint) {
+    if (!values.length) return "";
+    return `<div class="fgroup"><div class="flabel">${label}${hint ? ` <small>${hint}</small>` : ""}</div><div class="fchips">
+      ${values.map((v) => `<button type="button" class="fchip" data-f="${name}" data-v="${esc(v)}" aria-pressed="${filters[name].has(v)}">${esc(labelFn(v))}</button>`).join("")}
+    </div></div>`;
+  }
+
+  // ---------- list view ----------
+  function renderLevelList(list, current) {
+    const levels = DATASETS[list];
+    // Options for a filter group: values used by at least one entry in this list, plus any already selected.
+    const present = (name, all, valuesOf, norm = (v) => v) => {
+      const used = new Set(levels.flatMap(valuesOf));
+      return all.filter((v) => used.has(norm(v)) || filters[name].has(v));
+    };
+    const shown = levels.filter(matches);
+    const n = activeFilterCount();
     $("left").innerHTML = `
       <div class="pane-head">
-        <h2>Levels <span>${shown.length === LEVELS.length ? LEVELS.length : `${shown.length} of ${LEVELS.length}`}</span></h2>
-        <input id="q" class="search" type="search" placeholder="Search" value="${esc(query)}" aria-label="Search levels, creators or tags">
-        <select id="diff" class="diff-select" aria-label="Difficulty">
-          <option value="">All difficulties</option>
-          ${DIFFS.map((d) => `<option value="${d}" ${diffFilter === d ? "selected" : ""}>${cap(d)} demons</option>`).join("")}
-        </select>
+        <h2>${LISTS[list].noun} <span>${shown.length === levels.length ? levels.length : `${shown.length} of ${levels.length}`}</span></h2>
+        <input id="q" class="search" type="search" placeholder="Search" value="${esc(query)}" aria-label="Search by name, creator or tag">
+        <div class="frow">
+          <button type="button" id="ftoggle" class="fbtn" aria-expanded="${filtersOpen}">Filters${n ? ` (${n})` : ""}</button>
+          ${n ? `<button type="button" id="fclear" class="fbtn plain">Clear</button>` : ""}
+        </div>
+        <div class="fpanel" ${filtersOpen ? "" : "hidden"}>
+          ${filterGroup("difficulty", "Difficulty", present("difficulty", DIFFS, (lv) => [lv.difficulty]), cap)}
+          ${filterGroup("length", "Length", present("length", Object.keys(LENGTHS), (lv) => [lv.length]), (v) => LENGTHS[v][0])}
+          ${filterGroup("gamemodes", "Gamemodes", present("gamemodes", MODES, (lv) => lv.gamemodes), modeName, "has all")}
+          ${filterGroup("skillsets", "Skillsets", present("skillsets", cfg.allowedSkillsets || [], (lv) => lv.skillsets.map((x) => x.toLowerCase()), (v) => v.toLowerCase()), (v) => v, "has all")}
+        </div>
       </div>
       ${shown.length ? `<ol class="list">${shown.map((lv) => `
-        <li><a class="row" href="#${lv.slug}" aria-current="${lv === current}">
-          <span class="rank">${lv.rank}</span>
+        <li><a class="row${lv.rank ? "" : " est"}" href="#${lv.slug}" aria-current="${lv === current}">
+          <span class="rank">${rankText(lv)}</span>
           <img src="${esc(iconFor(lv))}" alt="${cap(lv.difficulty)} demon" loading="lazy" width="36" height="36">
           <span style="min-width:0">
             <span class="name" style="display:block">${esc(lv.name)}</span>
-            <span class="sub" style="display:block">${esc(lv.creators.join(", ") || "Unknown")}</span>
+            <span class="sub" style="display:block">${lv.rank ? "" : "Estimate · "}${esc(lv.creators.join(", ") || "Unknown")}</span>
           </span>
-        </a></li>`).join("")}</ol>` : `<p class="empty">No levels match your search.</p>`}`;
+        </a></li>`).join("")}</ol>`
+        : `<p class="empty">${levels.length ? "No levels match these filters." : `No ${LISTS[list].noun.toLowerCase()} yet. Add them under "${LISTS[list].key}" in list.json.`}</p>`}`;
+
     $("q").addEventListener("input", (e) => {
       query = e.target.value; const pos = e.target.selectionStart;
-      renderLevelList(current); const n = $("q"); n.focus(); n.setSelectionRange(pos, pos);
+      renderLevelList(list, current); const el = $("q"); el.focus(); el.setSelectionRange(pos, pos);
     });
-    $("diff").addEventListener("change", (e) => { diffFilter = e.target.value; renderLevelList(current); });
+    $("ftoggle").addEventListener("click", () => { filtersOpen = !filtersOpen; renderLevelList(list, current); $("ftoggle").focus(); });
+    $("fclear")?.addEventListener("click", () => { Object.values(filters).forEach((s) => s.clear()); renderLevelList(list, current); $("ftoggle").focus(); });
+    $("left").querySelectorAll(".fchip").forEach((b) => b.addEventListener("click", () => {
+      const set = filters[b.dataset.f];
+      set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
+      const top = $("left").scrollTop;
+      renderLevelList(list, current);
+      $("left").scrollTop = top;
+      $("left").querySelector(`.fchip[data-f="${b.dataset.f}"][data-v="${CSS.escape(b.dataset.v)}"]`)?.focus();
+    }));
   }
 
   function renderLevel(lv) {
@@ -417,21 +517,21 @@ a { color: var(--accent); }
         <div class="hero">
           <img src="${esc(iconFor(lv))}" alt="${cap(lv.difficulty)} demon" width="88" height="88">
           <div style="min-width:0">
-            <h3>#${lv.rank} – ${esc(lv.name)}</h3>
+            <h3>${rankText(lv)} ${esc(lv.name)}</h3>
             <div class="line">by <b>${esc(lv.creators.join(", ") || "Unknown")}</b></div>
-            <div class="line">${cap(lv.difficulty)} Demon · <span class="${ratingCls}">${RATING_LABEL[lv.rating]}</span></div>
+            <div class="line">${cap(lv.difficulty)} Demon · <span class="${ratingCls}">${RATING_LABEL[lv.rating]}</span>${lv.rank ? "" : ` · <span class="est-note">Unranked, placed for difficulty reference</span>`}</div>
           </div>
         </div>
 
         ${videoBlock(lv.video)}
 
         <dl class="facts">
-          <div><dt>Points</dt><dd class="pts">${fmt(lv.points)}</dd></div>
-          <div><dt>Level ID</dt><dd>${lv.id ? `<button class="copy" type="button" data-copy="${esc(lv.id)}" title="Copy ID">${esc(lv.id)}</button><span class="copied" id="copied"></span>` : "–"}</dd></div>
+          <div><dt>Points</dt><dd class="${lv.rank ? "pts" : ""}">${lv.rank ? fmt(lv.points) : "–"}</dd></div>
+          <div><dt>${lv.rank ? "GDPS Level ID" : "Vanilla Level ID"}</dt><dd>${lv.id ? `<button class="copy" type="button" data-copy="${esc(lv.id)}" title="Copy ID">${esc(lv.id)}</button><span class="copied" id="copied"></span>` : "–"}</dd></div>
           <div><dt>Verifier</dt><dd>${lv.verifier ? playerLink(lv.verifier) : "–"}</dd></div>
           <div><dt>Publisher</dt><dd>${esc(lv.publisher || "–")}</dd></div>
-          <div><dt>Requirement</dt><dd>${lv.requirement}%</dd></div>
-          <div><dt>Completions</dt><dd>${done}</dd></div>
+          ${lv.rank ? `<div><dt>Requirement</dt><dd>${lv.requirement}%</dd></div>` : ""}
+          ${lv.rank ? `<div><dt>Completions</dt><dd>${done}</dd></div>` : ""}
         </dl>
 
         <div class="tags">
@@ -465,79 +565,108 @@ a { color: var(--accent); }
   }
 
   // ---------- leaderboard view ----------
-  function renderLeaderboard(current) {
+  function renderLeaderboard(list, current) {
+    const players = leaderboardFor(list);
     $("left").innerHTML = `
-      <div class="pane-head"><h2>Players <span>${PLAYERS.length}</span></h2></div>
-      ${PLAYERS.length ? `<ol class="list">${PLAYERS.map((p) => `
+      <div class="pane-head">
+        <h2>Players <span>${players.length}</span></h2>
+        <div class="seg" role="group" aria-label="Leaderboard" ${hasList("main") && hasList("challenges") ? "" : "hidden"}>
+          <a href="#leaderboard" aria-current="${list === "main"}">${LISTS.main.label}</a>
+          <a href="#leaderboard-challenges" aria-current="${list === "challenges"}">${LISTS.challenges.label}</a>
+        </div>
+      </div>
+      ${players.length ? `<ol class="list">${players.map((p) => `
         <li><a class="row lb-row" href="#${p.slug}" aria-current="${p === current}">
-          <span class="rank">${p.rank}</span>
-          <span style="min-width:0"><span class="name" style="display:block">${esc(p.name)}</span><span class="sub" style="display:block">${p.done.length} completed</span></span>
-          <span class="pts">${fmt(p.points)}</span>
+          <span class="rank">#${p.rank[list]}</span>
+          <span style="min-width:0"><span class="name" style="display:block">${esc(p.name)}</span><span class="sub" style="display:block">${p.done[list].length} completed</span></span>
+          <span class="pts">${fmt(p.points[list])}</span>
         </a></li>`).join("")}</ol>` : `<p class="empty">No records yet.</p>`}`;
   }
 
   function renderPlayer(p) {
     if (!p) { $("mid").innerHTML = `<p class="empty">No players yet.</p>`; return; }
-    const hardest = p.done[0]?.lv;
-    const verified = LEVELS.filter((l) => l.verifier && slug(l.verifier) === p.key).length;
+    const allDone = [...p.done.main, ...p.done.challenges];
+    const hardest = p.done.main[0]?.lv || p.done.challenges[0]?.lv;
+    const verified = Object.values(DATASETS).flat().filter((l) => l.verifier && slug(l.verifier) === p.key).length;
     const item = ({ lv, r }) => `
       <li><a href="#${lv.slug}">
-        <span class="rk">#${lv.rank}</span>
+        <span class="rk">${rankText(lv)}</span>
         <img src="${esc(iconFor(lv))}" alt="" width="28" height="28" loading="lazy">
         <span class="nm">${esc(lv.name)}</span>
-        <span class="r">${r.percent < 100 ? `<small>${r.percent}%</small>` : ""}${fmt(r.points)}</span>
+        <span class="r">${r.percent < 100 ? `<small>${r.percent}%</small>` : ""}${lv.rank ? fmt(r.points) : `<small>unranked</small>`}</span>
       </a></li>`;
+    const section = (title, rows) => rows.length ? `<section><h4 class="section-title">${title}</h4><ul class="plist">${rows.map(item).join("")}</ul></section>` : "";
+    const rankLine = Object.keys(LISTS).filter((l) => p.rank[l]).map((l) => `${LISTS[l].label} #${p.rank[l]}`).join(" · ");
     $("mid").innerHTML = `
       <article class="sheet">
         <div class="hero">
           ${hardest ? `<img src="${esc(iconFor(hardest))}" alt="" width="88" height="88">` : `<span></span>`}
           <div style="min-width:0">
             <h3>${esc(p.name)}</h3>
-            <div class="line">Rank #${p.rank}${hardest ? ` · Hardest: <b>${esc(hardest.name)}</b>` : ""}</div>
+            <div class="line">${rankLine}${hardest ? ` · Hardest: <b>${esc(hardest.name)}</b>` : ""}</div>
           </div>
         </div>
         <dl class="facts">
-          <div><dt>Points</dt><dd class="pts">${fmt(p.points)}</dd></div>
-          <div><dt>Completed</dt><dd>${p.done.length}</dd></div>
-          <div><dt>In progress</dt><dd>${p.progress.length}</dd></div>
+          ${hasList("main") ? `<div><dt>List points</dt><dd class="pts">${fmt(p.points.main)}</dd></div>` : ""}
+          ${hasList("challenges") ? `<div><dt>Challenge points</dt><dd class="pts">${fmt(p.points.challenges)}</dd></div>` : ""}
+          <div><dt>Completed</dt><dd>${allDone.length}</dd></div>
           <div><dt>Verified</dt><dd>${verified}</dd></div>
         </dl>
-        <section>
-          <h4 class="section-title">Completed levels</h4>
-          ${p.done.length ? `<ul class="plist">${p.done.map(item).join("")}</ul>` : `<p class="empty">None yet.</p>`}
-        </section>
-        ${p.progress.length ? `<section><h4 class="section-title">Progress</h4><ul class="plist">${p.progress.map(item).join("")}</ul></section>` : ""}
+        ${section("Completed levels", p.done.main)}
+        ${section("Level progress", p.progress.main)}
+        ${section("Completed challenges", p.done.challenges)}
+        ${section("Challenge progress", p.progress.challenges)}
+        ${allDone.length || p.progress.main.length || p.progress.challenges.length ? "" : `<p class="empty">No records yet.</p>`}
       </article>`;
   }
 
-  function renderPointsTable() {
+  function renderPointsTable(list) {
+    const ranked = DATASETS[list].filter((lv) => lv.rank);
     $("right").innerHTML = `
-      <div class="pane-head"><h2>Points per level</h2></div>
-      <div style="overflow-x:auto"><table class="points-table">
-        <thead><tr><th>#</th><th>Level</th><th>Points</th></tr></thead>
-        <tbody>${LEVELS.map((lv) => `<tr><td>${lv.rank}</td><td><a href="#${lv.slug}">${esc(lv.name)}</a></td><td>${fmt(lv.points)}</td></tr>`).join("")}</tbody>
-      </table></div>`;
+      <div class="pane-head"><h2>Points per ${list === "challenges" ? "challenge" : "level"}</h2></div>
+      ${ranked.length ? `<div style="overflow-x:auto"><table class="points-table">
+        <thead><tr><th>Rank</th><th>${list === "challenges" ? "Challenge" : "Level"}</th><th>Points</th></tr></thead>
+        <tbody>${ranked.map((lv) => `<tr><td>#${lv.rank}</td><td><a href="#${lv.slug}">${esc(lv.name)}</a></td><td>${fmt(lv.points)}</td></tr>`).join("")}</tbody>
+      </table></div>` : `<p class="empty">Nothing ranked yet.</p>`}`;
   }
 
   // ---------- routing ----------
+  function setTab(id) {
+    ["tabList", "tabChallenges", "tabLb"].forEach((t) => $(t).setAttribute("aria-current", t === id ? "page" : "false"));
+  }
+  function showList(list, h) {
+    const levels = DATASETS[list];
+    setTab(list === "main" ? "tabList" : "tabChallenges");
+    const lv = levels.find((x) => x.slug === h) || levels[0];
+    renderLevelList(list, lv);
+    if (!lv) { $("mid").innerHTML = ""; $("right").innerHTML = ""; return; }
+    renderLevel(lv);
+    if (lv.rank) renderRecords(lv);
+    setRightPane(!!lv.rank);
+    $(list === "main" ? "tabList" : "tabChallenges").href = "#" + lv.slug;
+    const cur = $("left").querySelector('[aria-current="true"]');
+    if (cur && window.innerWidth > 760) cur.scrollIntoView({ block: "nearest" });
+  }
+  function setRightPane(show) {
+    $("right").hidden = !show;
+    document.querySelector(".app").classList.toggle("no-right", !show);
+  }
+  const hasList = (list) => DATASETS[list].length > 0;
   function route() {
     const h = location.hash.slice(1);
-    const lbView = h === "leaderboard" || h.startsWith("player-");
-    $("tabList").setAttribute("aria-current", lbView ? "false" : "page");
-    $("tabLb").setAttribute("aria-current", lbView ? "page" : "false");
-    if (!LEVELS.length) {
-      $("left").innerHTML = `<p class="empty">The list is empty. Add levels to list.json.</p>`;
-      $("mid").innerHTML = ""; $("right").innerHTML = ""; return;
-    }
-    if (lbView) {
-      const p = PLAYERS.find((x) => x.slug === h) || PLAYERS[0];
-      renderLeaderboard(p); renderPlayer(p); renderPointsTable();
+    setRightPane(true);
+    if (h === "leaderboard" || h === "leaderboard-challenges" || h.startsWith("player-")) {
+      setTab("tabLb");
+      if (h === "leaderboard") lbList = "main";
+      if (h === "leaderboard-challenges") lbList = "challenges";
+      if (!hasList(lbList)) lbList = hasList("main") ? "main" : "challenges";
+      const board = leaderboardFor(lbList);
+      const p = PLAYERS.find((x) => x.slug === h) || board[0];
+      renderLeaderboard(lbList, p); renderPlayer(p); renderPointsTable(lbList);
+    } else if (h.startsWith(LISTS.challenges.prefix + "-") || h === "challenges" || (!hasList("main") && hasList("challenges"))) {
+      showList("challenges", h);
     } else {
-      const lv = LEVELS.find((x) => x.slug === h) || LEVELS[0];
-      renderLevelList(lv); renderLevel(lv); renderRecords(lv);
-      $("tabList").href = "#" + lv.slug;
-      const cur = $("left").querySelector('[aria-current="true"]');
-      if (cur && window.innerWidth > 760) cur.scrollIntoView({ block: "nearest" });
+      showList("main", h);
     }
     if (window.innerWidth <= 760 && h) $("mid").scrollIntoView({ block: "start" });
   }
@@ -561,8 +690,14 @@ a { color: var(--accent); }
     cfg = DATA.settings || {};
     document.title = cfg.title || "Demonlist";
     $("title").textContent = cfg.title || "Demonlist";
-    LEVELS = (DATA.levels || []).map(validate);
+    for (const list of Object.keys(LISTS)) {
+      const counter = { n: 0 }, used = new Set();
+      DATASETS[list] = (DATA[LISTS[list].key] || []).map((raw, i) => validate(list, raw, i, counter, used));
+    }
     buildPlayers();
+    $("tabList").hidden = !hasList("main");
+    $("tabChallenges").hidden = !hasList("challenges");
+    if (!hasList("main") && hasList("challenges")) document.querySelector(".brand").href = "#challenge-1";
     showProblems();
     route();
   }
