@@ -29,8 +29,8 @@
     },
     "allowedSkillsets": [
       "Timings",
+      "Learny",
       "Memory",
-      "Wave Spam",
       "Straight Fly",
       "Fast-Paced",
       "Slow-Paced",
@@ -86,7 +86,9 @@
         "ball"
       ],
       "skillsets": [
-        "Slow-Paced"
+        "Slow-Paced",
+        "Learny",
+        "Chokepoints"
       ],
       "requirement": 100,
       "records": [
