@@ -158,6 +158,8 @@ a { color: var(--accent); }
 .video-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; text-decoration: none; }
 .video-link:hover { text-decoration: underline; }
 .video-link svg { width: 14px; height: 14px; fill: currentColor; }
+.video-embed { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--bg); border: 1px solid var(--border); }
+.video-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
 .section-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
 .tags { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 12px; align-items: baseline; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -277,6 +279,30 @@ a { color: var(--accent); }
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const fmt = (n) => n.toFixed(2);
   const modeName = (m) => (m === "ufo" ? "UFO" : cap(m));
+  // Turns a YouTube link (youtu.be, watch?v=, shorts, embed, live) into an embed URL. Returns null for anything else.
+  function youtubeEmbed(url) {
+    try {
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\.|^m\./, "");
+      let id = null;
+      if (host === "youtu.be") id = u.pathname.slice(1).split("/")[0];
+      else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+        id = u.searchParams.get("v");
+        const m = u.pathname.match(/^\/(?:embed|shorts|live|v)\/([^/?#]+)/);
+        if (!id && m) id = m[1];
+      }
+      if (!id || !/^[\w-]{6,}$/.test(id)) return null;
+      const t = u.searchParams.get("t") || u.searchParams.get("start");
+      const secs = t ? (/^\d+$/.test(t) ? t : (t.match(/(\d+)h/)?.[1] || 0) * 3600 + (t.match(/(\d+)m/)?.[1] || 0) * 60 + +(t.match(/(\d+)s/)?.[1] || 0)) : 0;
+      return "https://www.youtube.com/embed/" + id + (secs ? "?start=" + secs : "");
+    } catch (e) { return null; }
+  }
+  function videoBlock(url) {
+    if (!url) return "";
+    const embed = youtubeEmbed(url);
+    if (embed) return `<div class="video-embed"><iframe src="${esc(embed)}" title="Verification video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
+    return `<a class="video-link" href="${esc(url)}" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.8v12.4L14 8z"/></svg>Watch verification</a>`;
+  }
 
   let DATA, LEVELS = [], PLAYERS = [], cfg, query = "", diffFilter = "";
   const problems = [];
@@ -397,9 +423,7 @@ a { color: var(--accent); }
           </div>
         </div>
 
-        ${lv.video
-          ? `<a class="video-link" href="${esc(lv.video)}" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.8v12.4L14 8z"/></svg>Watch verification</a>`
-          : ""}
+        ${videoBlock(lv.video)}
 
         <dl class="facts">
           <div><dt>Points</dt><dd class="pts">${fmt(lv.points)}</dd></div>
